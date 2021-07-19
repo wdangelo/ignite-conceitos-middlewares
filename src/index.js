@@ -23,11 +23,11 @@ function checksExistsUserAccount(request, response, next) {
 function checksCreateTodosUserAvailability(request, response, next) {
   const { user } = request
 
-  if(user.pro === false && length(user.todo) > 10){
+  if(user.pro === false && user.todos.length === 10){
     return response.status(403).json({error: "exceeded todos limit"})
   }
 
-  if(user.pro === false && length(user.todo) <= 10 || user.pro === true){
+  if(user.pro === false && user.todos.length <= 10 || user.pro === true){
     return next()
   }
 
@@ -36,10 +36,41 @@ function checksCreateTodosUserAvailability(request, response, next) {
 function checksTodoExists(request, response, next) {
   const { username } = request.headers
   const { id } = request.params
+  
+
+  const user = users.find((user) => user.username === username)
+
+  if(!user){
+    return response.status(404).json({error: 'User not found!'})
+  }
+
+  if(!validate(id)){
+    return response.status(400).json({error: 'Invalid Todo ID'})
+  }
+
+  const todo = user.todos.find(todo => todo.id === id)
+
+  if(!todo){
+    return response.status(404).json({error: 'ID todo not found'})
+  }
+
+  request.todo = todo
+  request.user = user
+
+  return next()
 }
 
+
 function findUserById(request, response, next) {
-  // Complete aqui
+  const { id } = request.params
+
+  const user = users.find((user) => user.id === id)
+
+  if(!user){
+    return response.status(404).json({error: 'User not found!'})
+  }
+  request.user = user
+  return next()
 }
 
 app.post('/users', (request, response) => {
