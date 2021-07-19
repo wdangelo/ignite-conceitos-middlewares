@@ -10,15 +10,32 @@ app.use(cors());
 const users = [];
 
 function checksExistsUserAccount(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers
+  const user = users.find((user) => user.username === username)
+
+  if(!user){
+    return response.status(404).json({error: 'User not found!'})
+  }
+  request.user = user
+  return next()
 }
 
 function checksCreateTodosUserAvailability(request, response, next) {
-  // Complete aqui
+  const { user } = request
+
+  if(user.pro === false && length(user.todo) > 10){
+    return response.status(403).json({error: "exceeded todos limit"})
+  }
+
+  if(user.pro === false && length(user.todo) <= 10 || user.pro === true){
+    return next()
+  }
+
 }
 
 function checksTodoExists(request, response, next) {
-  // Complete aqui
+  const { username } = request.headers
+  const { id } = request.params
 }
 
 function findUserById(request, response, next) {
